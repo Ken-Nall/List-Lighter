@@ -1,13 +1,15 @@
 // ==UserScript==
 // @name         List Lighter
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  Highlight keywords with rainbow effects across all pages
 // @author       Ken-Nall
 // @match        *://*/*
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @run-at       document-end
+// @downloadURL  https://axzile.corp.amazon.com/-/carthamus/download_script/list-lighter.user.js
+// @updateURL    https://axzile.corp.amazon.com/-/carthamus/download_script/list-lighter.user.js
 // ==/UserScript==
 
 (function() {
@@ -408,19 +410,30 @@
         if (e.key === 'CapsLock') {
             console.log('[List Lighter] CapsLock pressed (Shift:', shiftPressed + ', Ctrl:', ctrlPressed + ')');
             if (shiftPressed && !ctrlPressed) {
-                e.preventDefault();
-                console.log('[List Lighter] Shift+CapsLock: Toggling modal');
-                toggleModal();
+            e.preventDefault();
+            console.log('[List Lighter] Shift+CapsLock: Toggling modal');
+            toggleModal();
             } else if (ctrlPressed && !shiftPressed) {
-                e.preventDefault();
-                settings.muted = !settings.muted;
-                console.log('[List Lighter] Ctrl+CapsLock: Muted set to', settings.muted);
-                GM_setValue('muted_' + window.location.href, settings.muted);
-                applyHighlights();
+            e.preventDefault();
+            settings.muted = !settings.muted;
+            console.log('[List Lighter] Ctrl+CapsLock: Muted set to', settings.muted);
+            GM_setValue('muted_' + window.location.href, settings.muted);
+            applyHighlights();
             } else if (!shiftPressed && !ctrlPressed) {
-                console.log('[List Lighter] CapsLock alone: Reapplying highlights');
-                setTimeout(applyHighlights, 50);
+            console.log('[List Lighter] CapsLock alone: Reapplying highlights');
+            setTimeout(applyHighlights, 50);
             }
+        }
+        
+        // Update hover states when Shift is pressed
+        if (e.key === 'Shift') {
+            document.querySelectorAll('.ll-keyword:hover').forEach(el => {
+            el.classList.remove('hover-remove');
+            const keyword = keywords.find(k => k.text === el.textContent);
+            if (keyword) {
+                el.classList.add(keyword.locked ? 'hover-unlock' : 'hover-lock');
+            }
+            });
         }
     });
 
