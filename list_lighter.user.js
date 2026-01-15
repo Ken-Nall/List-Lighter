@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         List Lighter
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  Highlight keywords with rainbow effects across all pages
 // @author       Ken-Nall
 // @match        *://*/*
@@ -15,7 +15,7 @@
 (function() {
     'use strict';
 
-    console.log('[List Lighter] Script initializing...');
+    //console.log('[List Lighter] Script initializing...');
 
     // State management
     let keywords = [];
@@ -46,27 +46,27 @@
 
     // Load settings
     function loadSettings() {
-        console.log('[List Lighter] Loading settings...');
+        //console.log('[List Lighter] Loading settings...');
         keywords = JSON.parse(GM_getValue('keywords', '[]'));
         settings.theme = GM_getValue('theme', 'traditional');
         settings.muted = GM_getValue('muted_' + window.location.href, false);
         settings.sortMode = GM_getValue('sortMode', 'newest');
-        console.log('[List Lighter] Loaded:', keywords.length, 'keywords, theme:', settings.theme, 'muted:', settings.muted, 'sort:', settings.sortMode);
+        //console.log('[List Lighter] Loaded:', keywords.length, 'keywords, theme:', settings.theme, 'muted:', settings.muted, 'sort:', settings.sortMode);
     }
 
     function saveSettings() {
-        console.log('[List Lighter] Saving settings...');
+        //console.log('[List Lighter] Saving settings...');
         GM_setValue('keywords', JSON.stringify(keywords));
         GM_setValue('theme', settings.theme);
         GM_setValue('sortMode', settings.sortMode);
-        console.log('[List Lighter] Settings saved');
+        //console.log('[List Lighter] Settings saved');
     }
 
     // Add keywords
     function addKeywords(text) {
-        console.log('[List Lighter] Adding keywords from text:', text);
+        //console.log('[List Lighter] Adding keywords from text:', text);
         const lines = text.split(/[\n,]+/).map(k => k.trim()).filter(k => k);
-        console.log('[List Lighter] Parsed lines:', lines);
+        //console.log('[List Lighter] Parsed lines:', lines);
         const timestamp = Date.now();
         let addedCount = 0;
         lines.forEach(keyword => {
@@ -77,48 +77,44 @@
                     added: timestamp
                 });
                 addedCount++;
-                console.log('[List Lighter] Added keyword:', keyword);
-            } else {
-                console.log('[List Lighter] Skipped duplicate keyword:', keyword);
+                //console.log('[List Lighter] Added keyword:', keyword);
             }
         });
-        console.log('[List Lighter] Added ' + addedCount + ' new keywords');
+        //console.log('[List Lighter] Added ' + addedCount + ' new keywords');
         saveSettings();
     }
 
     // Clear keywords
     function clearKeywords() {
-        console.log('[List Lighter] Clearing unlocked keywords...');
+        //console.log('[List Lighter] Clearing unlocked keywords...');
         const beforeCount = keywords.length;
         keywords = keywords.filter(k => k.locked);
-        console.log('[List Lighter] Cleared ' + (beforeCount - keywords.length) + ' keywords, ' + keywords.length + ' locked keywords remain');
+        //console.log('[List Lighter] Cleared ' + (beforeCount - keywords.length) + ' keywords, ' + keywords.length + ' locked keywords remain');
         saveSettings();
     }
 
     // Remove keyword
     function removeKeyword(keyword) {
-        console.log('[List Lighter] Removing keyword:', keyword);
+        //console.log('[List Lighter] Removing keyword:', keyword);
         keywords = keywords.filter(k => k.text !== keyword);
-        console.log('[List Lighter] Keyword removed, remaining:', keywords.length);
+        //console.log('[List Lighter] Keyword removed, remaining:', keywords.length);
         saveSettings();
     }
 
     // Toggle lock
     function toggleLock(keyword) {
-        console.log('[List Lighter] Toggling lock for:', keyword);
+        //console.log('[List Lighter] Toggling lock for:', keyword);
         const kw = keywords.find(k => k.text === keyword);
         if (kw) {
             kw.locked = !kw.locked;
-            console.log('[List Lighter] Lock toggled to:', kw.locked);
+            //console.log('[List Lighter] Lock toggled to:', kw.locked);
             saveSettings();
-        } else {
-            console.log('[List Lighter] Keyword not found for lock toggle:', keyword);
         }
     }
 
     // Sort keywords
     function sortKeywords() {
-        console.log('[List Lighter] Sorting keywords by:', settings.sortMode);
+        //console.log('[List Lighter] Sorting keywords by:', settings.sortMode);
         switch(settings.sortMode) {
             case 'locked':
                 keywords.sort((a, b) => (b.locked ? 1 : 0) - (a.locked ? 1 : 0));
@@ -134,16 +130,15 @@
                 keywords.sort((a, b) => b.added - a.added);
                 break;
         }
-        console.log('[List Lighter] Keywords sorted');
     }
 
     // Create modal
     function createModal() {
-        console.log('[List Lighter] Creating modal...');
+        //console.log('[List Lighter] Creating modal...');
         
         // Check if modal already exists
         if (document.getElementById('list-lighter-modal')) {
-            console.log('[List Lighter] Modal already exists, skipping creation');
+            //console.log('[List Lighter] Modal already exists, skipping creation');
             return;
         }
 
@@ -227,11 +222,11 @@
             <div id="ll-list" style="margin-top: 15px;"></div>
         `;
         document.body.appendChild(modal);
-        console.log('[List Lighter] Modal DOM element created and appended');
+        //console.log('[List Lighter] Modal DOM element created and appended');
 
         // Event listeners
         document.getElementById('ll-add').addEventListener('click', () => {
-            console.log('[List Lighter] Add button clicked');
+            //console.log('[List Lighter] Add button clicked');
             const text = document.getElementById('ll-input').value;
             addKeywords(text);
             document.getElementById('ll-input').value = '';
@@ -239,25 +234,25 @@
         });
 
         document.getElementById('ll-clear').addEventListener('click', () => {
-            console.log('[List Lighter] Clear button clicked');
+            //console.log('[List Lighter] Clear button clicked');
             clearKeywords();
             displayKeywords();
         });
 
         document.getElementById('ll-display').addEventListener('click', () => {
-            console.log('[List Lighter] Display button clicked');
+            //console.log('[List Lighter] Display button clicked');
             displayKeywords();
         });
 
         document.getElementById('ll-theme').addEventListener('change', (e) => {
-            console.log('[List Lighter] Theme changed to:', e.target.value);
+            //console.log('[List Lighter] Theme changed to:', e.target.value);
             settings.theme = e.target.value;
             saveSettings();
             applyHighlights();
         });
 
         document.getElementById('ll-sort').addEventListener('change', (e) => {
-            console.log('[List Lighter] Sort mode changed to:', e.target.value);
+            //console.log('[List Lighter] Sort mode changed to:', e.target.value);
             settings.sortMode = e.target.value;
             saveSettings();
             displayKeywords();
@@ -265,12 +260,12 @@
 
         document.getElementById('ll-theme').value = settings.theme;
         document.getElementById('ll-sort').value = settings.sortMode;
-        console.log('[List Lighter] Modal event listeners attached');
+        //console.log('[List Lighter] Modal event listeners attached');
     }
 
     // Display keywords
     function displayKeywords() {
-        console.log('[List Lighter] Displaying keywords...');
+        //console.log('[List Lighter] Displaying keywords...');
         sortKeywords();
         const list = document.getElementById('ll-list');
         if (!list) {
@@ -296,7 +291,7 @@
             });
 
             span.addEventListener('click', function(e) {
-                console.log('[List Lighter] Keyword clicked:', kw.text, 'Shift:', e.shiftKey);
+                //console.log('[List Lighter] Keyword clicked:', kw.text, 'Shift:', e.shiftKey);
                 if (e.shiftKey) {
                     toggleLock(kw.text);
                 } else {
@@ -307,7 +302,7 @@
 
             list.appendChild(span);
         });
-        console.log('[List Lighter] Displayed ' + keywords.length + ' keywords');
+        //console.log('[List Lighter] Displayed ' + keywords.length + ' keywords');
     }
 
     // Toggle modal
@@ -322,11 +317,11 @@
         modal.style.display = isModalOpen ? 'block' : 'none';
         
         if (isModalOpen) {
-            console.log('[List Lighter] Modal opened');
+            //console.log('[List Lighter] Modal opened');
             displayKeywords();
             document.getElementById('ll-input').focus(); // Auto-focus input for speed
         } else {
-            console.log('[List Lighter] Modal closed, applying highlights');
+            //console.log('[List Lighter] Modal closed, applying highlights');
             applyHighlights();
         }
     }
@@ -456,13 +451,13 @@
     // Throttle mechanism for applyHighlights
     let highlightTimeout = null;
     const throttledApplyHighlights = function() {
-        console.log('[List Lighter] Throttled highlight requested');
+        //console.log('[List Lighter] Throttled highlight requested');
         if (highlightTimeout) {
             cancelIdleCallback(highlightTimeout);
-            console.log('[List Lighter] Cancelled previous idle callback');
+            //console.log('[List Lighter] Cancelled previous idle callback');
         }
         highlightTimeout = requestIdleCallback(() => {
-            console.log('[List Lighter] Executing throttled highlight');
+            //console.log('[List Lighter] Executing throttled highlight');
             applyHighlights();
         }, { timeout: 2000 });
     };
@@ -483,14 +478,14 @@
             if (e.shiftKey) {
                 // Alt + Shift + L: Toggle Mute
                 settings.muted = !settings.muted;
-                console.log('[List Lighter] Mute toggled via shortcut:', settings.muted);
+                //console.log('[List Lighter] Mute toggled via shortcut:', settings.muted);
                 GM_setValue('muted_' + window.location.href, settings.muted);
                 
                 // Visual feedback: briefly show the modal or just re-apply
                 applyHighlights();
             } else {
                 // Alt + L: Toggle Modal
-                console.log('[List Lighter] Alt+L: Toggling modal');
+                //console.log('[List Lighter] Alt+L: Toggling modal');
                 toggleModal();
             }
         }
@@ -521,10 +516,10 @@
     });
 
     function setupObserver() {
-        console.log('[List Lighter] Setting up mutation observer...');
+        //console.log('[List Lighter] Setting up mutation observer...');
         if (observer) {
             observer.disconnect();
-            console.log('[List Lighter] Disconnected existing observer');
+            //console.log('[List Lighter] Disconnected existing observer');
         }
         observer = new MutationObserver((mutations) => {
             const isInternal = mutations.every(m => 
@@ -533,36 +528,36 @@
                 (m.target.closest && m.target.closest('#list-lighter-modal'))
             );
             if (!isInternal) {
-                console.log('[List Lighter] External DOM mutation detected, triggering highlight');
+                //console.log('[List Lighter] External DOM mutation detected, triggering highlight');
                 throttledApplyHighlights();
             }
         });
         observer.observe(document.body, { childList: true, subtree: true });
-        console.log('[List Lighter] Mutation observer active');
+        //console.log('[List Lighter] Mutation observer active');
     }
 
     // Initialize
-    console.log('[List Lighter] Beginning initialization sequence...');
+    //console.log('[List Lighter] Beginning initialization sequence...');
     loadSettings();
     updateStyles();
     createModal(); // *** FIXED: Actually call createModal ***
     
     // Initial runs
-    console.log('[List Lighter] Scheduling initial highlight application...');
+    //console.log('[List Lighter] Scheduling initial highlight application...');
     // Run highlights every 0.5s for the first 4 seconds
     for (let i = 0; i < 8; i++) {
         setTimeout(() => {
-            console.log(`[List Lighter] Initial highlight application ${i + 1}/8 starting...`);
+            //console.log(`[List Lighter] Initial highlight application ${i + 1}/8 starting...`);
             applyHighlights();
         }, i * 500);
     }
     
-    console.log('[List Lighter] Scheduling observer setup...');
+    //console.log('[List Lighter] Scheduling observer setup...');
     setTimeout(() => {
-        console.log('[List Lighter] Setting up observer...');
+        //console.log('[List Lighter] Setting up observer...');
         setupObserver();
     }, 2000);
 
-    console.log('[List Lighter] Script initialization complete');
+    //console.log('[List Lighter] Script initialization complete');
 
 })();
